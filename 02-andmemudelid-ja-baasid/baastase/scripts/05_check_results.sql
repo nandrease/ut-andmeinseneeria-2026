@@ -9,7 +9,7 @@ ORDER BY tabel;
 
 SELECT
     f.tellimuse_nr,
-    f.kuupaev,
+    d.kuupaev,
     k.kliendi_nimi,
     t.toote_nimi,
     t.kategooria,
@@ -18,7 +18,8 @@ SELECT
 FROM fact_muuk f
 JOIN dim_klient k ON f.klient_key = k.klient_key
 JOIN dim_toode t ON f.toode_key = t.toode_key
-ORDER BY f.kuupaev, f.tellimuse_nr, t.toote_nimi;
+JOIN dim_kuupaev d ON f.kuupaev_key = d.kuupaev_key
+ORDER BY d.kuupaev, f.tellimuse_nr, t.toote_nimi;
 
 SELECT
     t.kategooria,
@@ -34,4 +35,14 @@ SELECT
 FROM fact_muuk f
 JOIN dim_klient k ON f.klient_key = k.klient_key
 GROUP BY k.kliendityyp
+ORDER BY muuk_kokku DESC;
+
+SELECT
+    CASE WHEN d.kuupaev_toopaev THEN '+' ELSE '-' END AS kuupaev_toopaev,
+    d.kuupaev_nadalapaev,
+    d.kuupaev,
+    SUM(f.muugisumma) AS muuk_kokku
+FROM fact_muuk f
+JOIN dim_kuupaev d ON f.kuupaev_key = d.kuupaev_key
+GROUP BY d.kuupaev_toopaev, d.kuupaev_nadalapaev, d.kuupaev
 ORDER BY muuk_kokku DESC;
