@@ -12,6 +12,9 @@ ADD COLUMN IF NOT EXISTS newsletter_opt_in BOOLEAN;
 ALTER TABLE analytics.user_profile
 ADD COLUMN IF NOT EXISTS preferred_channel TEXT;
 
+ALTER TABLE analytics.user_profile
+ADD COLUMN IF NOT EXISTS has_missing_additional_data BOOLEAN;
+
 CREATE OR REPLACE VIEW intermediate.notification_preferences_normalized AS
 SELECT
     email AS source_email,
@@ -37,7 +40,9 @@ SELECT
     s.account_status,
     s.source_system,
     p.newsletter_opt_in,
-    p.preferred_channel
+    p.preferred_channel,
+    (s.account_status IS NULL OR p.newsletter_opt_in IS NULL)
+        AS has_missing_additional_data
 FROM intermediate.api_users_normalized AS a
 LEFT JOIN intermediate.user_status_normalized AS s
     ON a.email_key = s.email_key

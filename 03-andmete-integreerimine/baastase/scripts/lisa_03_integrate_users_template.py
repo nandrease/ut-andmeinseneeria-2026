@@ -147,9 +147,11 @@ def load_final_rows_from_intermediate(conn):
     TODO:
     1. Tühjenda analytics.user_profile.
     2. Lae andmed vaatest intermediate.user_profile_enriched.
-    3. Salvesta lõpptabelisse väljad:
-       user_id, full_name, username, email, city, company_name,
-       account_status, source_system, newsletter_opt_in, preferred_channel.
+    3. Salvesta lõpptabelisse väljad (sh `phone`, kui see on skeemis;
+       lisaülesanne 3: ka `has_missing_additional_data`, kui see on vaates):
+       user_id, full_name, username, email, phone, city, company_name,
+       account_status, source_system, newsletter_opt_in, preferred_channel,
+       has_missing_additional_data.
     4. Tagasta sisestatud ridade arv.
     """
     raise NotImplementedError("Tee load_final_rows_from_intermediate valmis.")

@@ -38,6 +38,7 @@ CREATE TABLE analytics.user_profile (
     source_system TEXT,
     newsletter_opt_in BOOLEAN,
     preferred_channel TEXT,
+    has_missing_additional_data BOOLEAN,
     loaded_at TIMESTAMP DEFAULT NOW()
 );
 

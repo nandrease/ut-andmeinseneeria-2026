@@ -129,6 +129,7 @@ def load_final_rows_from_intermediate(conn):
                 source_system,
                 newsletter_opt_in,
                 preferred_channel,
+                has_missing_additional_data,
                 loaded_at
             )
             SELECT
@@ -142,6 +143,7 @@ def load_final_rows_from_intermediate(conn):
                 source_system,
                 newsletter_opt_in,
                 preferred_channel,
+                has_missing_additional_data,
                 NOW()
             FROM intermediate.user_profile_enriched
             ORDER BY user_id;
