@@ -40,6 +40,7 @@ def fetch_api_users():
                 "full_name": " ".join(item["name"].split()),
                 "username": item["username"],
                 "email": item["email"],
+                "phone": item["phone"],
                 "city": item["address"]["city"],
                 "company_name": item["company"]["name"],
             }
@@ -70,17 +71,19 @@ def load_api_users(conn, api_users):
                     full_name,
                     username,
                     email,
+                    phone,
                     city,
                     company_name,
                     loaded_at
                 )
-                VALUES (%s, %s, %s, %s, %s, %s, NOW());
+                VALUES (%s, %s, %s, %s, %s, %s, %s, NOW());
                 """,
                 (
                     user["user_id"],
                     user["full_name"],
                     user["username"],
                     user["email"],
+                    user["phone"],
                     user["city"],
                     user["company_name"],
                 ),
@@ -148,6 +151,7 @@ def load_final_rows_from_intermediate(conn):
                 full_name,
                 username,
                 email,
+                phone,
                 city,
                 company_name,
                 account_status,
@@ -161,6 +165,7 @@ def load_final_rows_from_intermediate(conn):
                 full_name,
                 username,
                 email,
+                phone,
                 city,
                 company_name,
                 account_status,

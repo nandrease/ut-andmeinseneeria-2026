@@ -21,12 +21,17 @@ SELECT
     updated_at
 FROM staging.notification_preferences;
 
-CREATE OR REPLACE VIEW intermediate.user_profile_enriched AS
+-- Kustuta vaade enne uuesti loomist: `CREATE OR REPLACE VIEW` ei luba muuta
+-- olemasolevate veergude järjekorda (nt baasvaates on `phone` enne `city`).
+DROP VIEW IF EXISTS intermediate.user_profile_enriched;
+
+CREATE VIEW intermediate.user_profile_enriched AS
 SELECT
     a.user_id,
     a.full_name,
     a.username,
     a.email_key AS email,
+    a.phone,
     a.city,
     a.company_name,
     s.account_status,

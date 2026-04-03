@@ -76,6 +76,7 @@ def fetch_api_users():
                 # See tähendab, et võtame kõigepealt `address` ja selle seest `city`.
                 "city": item["address"]["city"],
                 "company_name": item["company"]["name"],
+                "phone": item["phone"],
             }
         )
 
@@ -107,9 +108,10 @@ def load_api_users(conn, api_users):
                     email,
                     city,
                     company_name,
+                    phone,
                     loaded_at
                 )
-                VALUES (%s, %s, %s, %s, %s, %s, NOW());
+                VALUES (%s, %s, %s, %s, %s, %s, %s, NOW());
                 """,
                 (
                     # See tuppel peab olema samas järjekorras nagu `%s` kohad SQL-is.
@@ -119,6 +121,7 @@ def load_api_users(conn, api_users):
                     user["email"],
                     user["city"],
                     user["company_name"],
+                    user["phone"],
                 ),
             )
 
@@ -170,6 +173,7 @@ def load_final_rows_from_intermediate(conn):
                 full_name,
                 username,
                 email,
+                phone,
                 city,
                 company_name,
                 account_status,
@@ -181,6 +185,7 @@ def load_final_rows_from_intermediate(conn):
                 full_name,
                 username,
                 email,
+                phone,
                 city,
                 company_name,
                 account_status,

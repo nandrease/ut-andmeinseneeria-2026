@@ -11,6 +11,7 @@ SELECT
     user_id,
     full_name,
     email,
+    phone,
     account_status,
     source_system
 FROM intermediate.user_profile_enriched
@@ -20,6 +21,7 @@ SELECT
     user_id,
     full_name,
     email,
+    phone,
     account_status,
     source_system
 FROM analytics.user_profile
