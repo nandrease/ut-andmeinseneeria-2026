@@ -1044,7 +1044,7 @@ Lahendus:
 
 ## Kokkuvõte
 
-Selles praktikumis ehitasid väikese, aga päris andmetoru, millel on olemas ajastus, logimine ja uuesti käivitamise (`retry`) loogika.
+Selles praktikumis ehitasid väikese, aga päris andmetoru, millel on olemas ajastus, logimine ja uuesti käivitamise loogika.
 
 Oluline ei olnud ainult see, et andmed jõuaksid tabelisse.
 
