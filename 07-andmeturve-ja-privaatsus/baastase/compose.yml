@@ -1,0 +1,25 @@
+services:
+  db:
+    image: pgduckdb/pgduckdb:18-v1.1.1
+    container_name: praktikum-db-07-base
+    env_file:
+      - .env
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-praktikum}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-praktikum}
+      POSTGRES_DB: ${POSTGRES_DB:-praktikum}
+    ports:
+      - "${DB_PORT_HOST:-5437}:5432"
+    volumes:
+      - ./data:/data
+      - ./scripts:/scripts
+      - pgdata_07_base:/var/lib/postgresql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-praktikum} -d ${POSTGRES_DB:-praktikum}"]
+      interval: 10s
+      retries: 5
+      start_period: 5s
+
+volumes:
+  pgdata_07_base:
+    name: praktikum-db-07-base-pgdata
