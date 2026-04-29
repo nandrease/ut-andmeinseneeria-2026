@@ -1,5 +1,8 @@
 \echo 'Loon PII registri governance.pii_register.'
 
+-- See tabel ei ole kogu andmekataloog ega andmetöötlusregister.
+-- See on praktikumi väike PII klassifitseerimise tabel: iga rida kirjeldab üht veergu.
+-- Päris projektis hoitakse sellist infot sageli andmekataloogis või andmehalduse tööriistas.
 CREATE TABLE IF NOT EXISTS governance.pii_register (
     sort_order INTEGER PRIMARY KEY,
     schema_name TEXT NOT NULL,
@@ -10,8 +13,13 @@ CREATE TABLE IF NOT EXISTS governance.pii_register (
     handling_note TEXT NOT NULL
 );
 
+-- Registri sisu ehitatakse iga käivitusega uuesti.
+-- Nii saab skripti parandada ja uuesti käivitada ilma käsitsi koristamata.
 TRUNCATE TABLE governance.pii_register;
 
+-- Iga INSERT rida kirjeldab üht toortabeli veergu.
+-- pii_category eristab otsest PII-d, kaudset PII-d ja mitte-PII välju.
+-- handling_note aitab hiljem otsustada, kas välja näidata, maskeerida või koondada.
 INSERT INTO governance.pii_register
     (sort_order, schema_name, table_name, column_name, pii_category, reason, handling_note)
 VALUES
@@ -48,6 +56,7 @@ VALUES
 
 \echo 'PII register on valmis.'
 
+-- Viimane päring näitab registrit õppijale kohe pärast loomist.
 SELECT column_name, pii_category, handling_note
 FROM governance.pii_register
 ORDER BY sort_order;

@@ -1,11 +1,18 @@
 \echo 'Loon skeemid staging, governance ja secured.'
 
+-- Skeemid aitavad andmeid kihiti eraldada.
+-- staging: toorandmed, mida tavakasutaja ei peaks otse lugema.
+-- governance: andmete kirjeldus ja PII register.
+-- secured: vaated, mille kaudu rollid andmeid loevad.
 CREATE SCHEMA IF NOT EXISTS staging;
 CREATE SCHEMA IF NOT EXISTS governance;
 CREATE SCHEMA IF NOT EXISTS secured;
 
 \echo 'Loon toorandmete tabeli staging.osalejad_raw.'
 
+-- Toortabelis on kõik väljad olemas algsel kujul.
+-- See on mugav laadimiseks, kuid ei ole sobiv üldiseks jagamiseks,
+-- sest tabel sisaldab nime, e-posti ja telefoni.
 CREATE TABLE IF NOT EXISTS staging.osalejad_raw (
     osaleja_id TEXT PRIMARY KEY,
     eesnimi TEXT NOT NULL,
@@ -19,6 +26,8 @@ CREATE TABLE IF NOT EXISTS staging.osalejad_raw (
     registreerumise_kuupaev DATE NOT NULL
 );
 
+-- COMMENT ON lisab andmebaasi metaandmeid.
+-- Need kommentaarid ei muuda õigusi, kuid aitavad tabeli eesmärki hiljem mõista.
 COMMENT ON TABLE staging.osalejad_raw IS
     'Sünteetiline praktikumi toortabel. Sisaldab PII-laadseid, kuid väljamõeldud andmeid.';
 
