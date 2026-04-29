@@ -167,7 +167,7 @@ Selles praktikumis teeme selle põhimõtte nähtavaks kolme rolliga:
 
 - `analyytik` näeb maskeeritud reataseme andmeid;
 - `aruandlus` näeb ainult koondandmeid;
-- `auditor` näeb toorandmeid.
+- `auditor` näeb toorandmeid ja turvatud vaateid.
 
 ## Uued mõisted
 
@@ -219,7 +219,7 @@ Näide:
 
 - `analyytik` vajab andmeid mustrite uurimiseks;
 - `aruandlus` vajab ainult koondtulemusi;
-- `auditor` vajab kontrolli jaoks täielikku ligipääsu.
+- `auditor` vajab kontrolli jaoks täielikku lugemisõigust.
 
 Tehniliselt loome PostgreSQL rollid ja anname igale rollile `SELECT` õiguse ainult neile objektidele, mida ta vajab.
 
@@ -231,7 +231,28 @@ Näide:
 
 Kui aruandluse roll vajab osalejate arvu kursuse ja maakonna lõikes, siis ta ei vaja e-posti aadresse ega telefoninumbreid.
 
-Selles praktikumis ei saa `aruandlus` roll ligipääsu toortabelile. Ta saab lugeda ainult koondvaadet.
+Selles praktikumis ei saa `aruandlus` roll ligipääsu toortabelile. Andmete vaatamiseks saab ta lugeda ainult koondvaadet.
+
+### Vaikeroll ja õiguste jagamine
+
+Selles õppekeskkonnas on andmebaasi vaikeroll `praktikum`. See tuleb `.env` failist:
+
+```text
+POSTGRES_USER=praktikum
+```
+
+Kui käivitad käsu `docker compose exec client psql ...` ja ei kasuta `SET ROLE` käsku, siis töötad `praktikum` kasutajana. See on õppekeskkonna administraatoriroll: ta loob selles praktikumis skeemid, tabelid, vaated ja rollid ning jagab teistele rollidele õigused. See ei ole näide tavakasutaja õigustest.
+
+Rollid `analyytik`, `aruandlus` ja `auditor` on töörollid. Need ei ole eraldi sisselogimiskasutajad. Praktikumis võtad nende rollide vaate ajutiselt käsuga `SET ROLE`, et kontrollida, mida iga roll näeb. Seda saab teha, sest `praktikum` on õppekeskkonna seadistusroll.
+
+Päris tööelus ei jaga kasutaja endale ise õigusi. Täpsed rollinimed erinevad, kuid vastutus jaguneb tavaliselt nii:
+
+- andmeomanik otsustab, kellel on tööks ligipääsu vaja;
+- andmekaitse või turbe eest vastutav roll aitab hinnata tundlike andmete riske;
+- andmebaasi või andmeplatvormi administraator rakendab õigused tehniliselt;
+- muudatused tehakse taotluse, kinnituse ja hilisema ülevaatuse kaudu.
+
+Andmeinsener võib õiguste seadistuse valmis kirjutada, kuid laia ligipääsu otsus peab olema põhjendatud ja kontrollitav.
 
 ### Saladus
 
@@ -576,12 +597,15 @@ Käivita turvaseadistuse skript:
 docker compose exec client psql -f scripts/04_create_roles_and_views.sql
 ```
 
-Skript teeb neli asja:
+Skript käivitatakse vaikerolliga `praktikum`. See roll loob töörollid ja annab neile õigused.
+
+Skript teeb viis asja:
 
 - loob rollid `analyytik`, `aruandlus` ja `auditor`;
 - loob maskeeritud vaate `secured.v_osalejad_analyytik`;
 - loob koondvaate `secured.v_osalejad_aruandlus`;
-- annab igale rollile ainult vajaliku `SELECT` õiguse.
+- eemaldab tundlikelt objektidelt `PUBLIC` õigused;
+- annab igale töörollile ainult vajaliku `SELECT` õiguse.
 
 Kontrolli turvatud vaateid:
 
@@ -597,7 +621,7 @@ Vaata õiguste kokkuvõtet:
 docker compose exec client psql -c '\z secured.*'
 ```
 
-Oodatav tulemus: `analyytik` on seotud analyytiku vaatega ja `aruandlus` aruandluse vaatega.
+Oodatav tulemus: `analyytik` on seotud analyytiku vaatega, `aruandlus` aruandluse vaatega ja `auditor` mõlema turvatud vaatega.
 
 ## 9. Kontrolli rolle ühe skriptiga
 
@@ -611,6 +635,7 @@ docker compose exec client psql -f scripts/05_check_results.sql
 
 Skript kontrollib:
 
+- millise andmebaasi kasutajana skript töötab;
 - mitu rida on toortabelis;
 - millised veerud on PII registris;
 - millistel rollidel on `SELECT` õigus;
@@ -620,10 +645,11 @@ Skript kontrollib:
 
 Olulised oodatavad tulemused:
 
+- kontrolli alguses on `current_user` ja `session_user` väärtus `praktikum`;
 - `analyytik` ei saa `SELECT` õigust tabelile `staging.osalejad_raw`;
 - `analyytik` saab lugeda vaadet `secured.v_osalejad_analyytik`;
-- `aruandlus` saab lugeda ainult koondvaadet;
-- `auditor` saab lugeda toortabelit.
+- `aruandlus` saab andmevaadetest lugeda ainult koondvaadet;
+- `auditor` saab lugeda toortabelit ja mõlemat turvatud vaadet.
 
 Analyytiku väljundis peavad nimi, e-post ja telefon olema maskeeritud. Näiteks e-post kuvatakse kujul `m***@example.test`.
 
@@ -696,11 +722,13 @@ docker compose exec client psql -c '\z secured.*'
 Oodatav tulemus:
 
 - `staging.osalejad_raw` juures on näha `auditor` õigus;
-- `secured.v_osalejad_analyytik` juures on näha `analyytik` õigus;
-- `secured.v_osalejad_aruandlus` juures on näha `aruandlus` õigus;
+- `secured.v_osalejad_analyytik` juures on näha `analyytik` ja `auditor` õigus;
+- `secured.v_osalejad_aruandlus` juures on näha `aruandlus` ja `auditor` õigus;
 - `analyytik` ja `aruandlus` ei ole toortabeli õiguste juures.
 
-See ongi minimaalõiguste põhimõte praktilisel kujul.
+`praktikum` on vaikeroll, millega objektid loodi. Töörollide erinevused tulevad nähtavale eraldi antud õiguste kaudu.
+
+See ongi minimaalõiguste põhimõte praktilisel kujul: tavarollid näevad ainult oma tööks vajalikku vaadet, kontrolliroll saab võrrelda toorandmeid ja jagatavaid vaateid.
 
 ## Kontrollpunktid
 
@@ -712,7 +740,7 @@ Praktikumi lõpuks peaksid saama kinnitada järgmised väited:
 - Tabel `governance.pii_register` kirjeldab kõiki toortabeli olulisi veerge.
 - Roll `analyytik` näeb maskeeritud vaadet, kuid mitte toortabelit.
 - Roll `aruandlus` näeb koondandmeid, kuid mitte reataseme isikuandmeid.
-- Roll `auditor` näeb toortabelit.
+- Roll `auditor` näeb toortabelit ja turvatud vaateid.
 - Keelatud päring annab `permission denied` vea.
 
 ## Levinud vead ja lahendused
@@ -800,7 +828,7 @@ LIMIT 3;
 
 Selles praktikumis tegid läbi väikese andmeturbe töövoo.
 
-Sa lõid toortabeli, laadisid sinna sünteetilised andmed, kirjeldasid PII veerud registris ja seadsid üles kolm rolli. Oluline mõte on see, et roll ei pea nägema toortabelit ainult sellepärast, et tal on vaja andmetega tööd teha. Sageli piisab maskeeritud vaatest või koondvaatest.
+Sa lõid toortabeli, laadisid sinna sünteetilised andmed, kirjeldasid PII veerud registris ja seadsid üles kolm töörolli. Oluline mõte on see, et roll ei pea nägema toortabelit ainult sellepärast, et tal on vaja andmetega tööd teha. Sageli piisab maskeeritud vaatest või koondvaatest. Kontrolliroll on erandlik: tema ligipääs peab aitama õigusi ja vaateid kontrollida.
 
 Tööelus on sama põhimõte suurem ja rangem, aga tuum on sama:
 

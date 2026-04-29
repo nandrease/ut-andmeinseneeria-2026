@@ -79,6 +79,10 @@ REVOKE ALL ON ALL TABLES IN SCHEMA governance FROM PUBLIC;
 REVOKE ALL ON ALL TABLES IN SCHEMA secured FROM PUBLIC;
 
 -- Kui skripti käivitatakse uuesti, lähtestatakse rollide õigused.
+REVOKE ALL ON SCHEMA staging FROM analyytik, aruandlus, auditor;
+REVOKE ALL ON SCHEMA governance FROM analyytik, aruandlus, auditor;
+REVOKE ALL ON SCHEMA secured FROM analyytik, aruandlus, auditor;
+
 REVOKE ALL ON ALL TABLES IN SCHEMA staging FROM analyytik, aruandlus, auditor;
 REVOKE ALL ON ALL TABLES IN SCHEMA governance FROM analyytik, aruandlus, auditor;
 REVOKE ALL ON ALL TABLES IN SCHEMA secured FROM analyytik, aruandlus, auditor;
@@ -89,12 +93,14 @@ GRANT USAGE ON SCHEMA governance TO analyytik, aruandlus, auditor;
 GRANT SELECT ON governance.pii_register TO analyytik, aruandlus, auditor;
 
 -- Tavakasutuse rollid saavad lugeda ainult neile mõeldud secured vaateid.
-GRANT USAGE ON SCHEMA secured TO analyytik, aruandlus;
-GRANT SELECT ON secured.v_osalejad_analyytik TO analyytik;
-GRANT SELECT ON secured.v_osalejad_aruandlus TO aruandlus;
+-- Auditor saab lugeda mõlemat vaadet, et kontrollida jagatavat andmekuju.
+GRANT USAGE ON SCHEMA secured TO analyytik, aruandlus, auditor;
+GRANT SELECT ON secured.v_osalejad_analyytik TO analyytik, auditor;
+GRANT SELECT ON secured.v_osalejad_aruandlus TO aruandlus, auditor;
 
 -- Auditor on erandlik kontrolliroll.
--- Tema näeb toortabelit, et saaks võrrelda maskeeritud ja algset kuju.
+-- Tema näeb nii toortabelit kui ka turvatud vaateid,
+-- et saaks võrrelda algset, maskeeritud ja koondatud kuju.
 GRANT USAGE ON SCHEMA staging TO auditor;
 GRANT SELECT ON staging.osalejad_raw TO auditor;
 
