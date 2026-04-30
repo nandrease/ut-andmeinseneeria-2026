@@ -194,7 +194,7 @@ ORDER BY column_name;
 Ava teises terminalis auditilogi jälgimine:
 
 ```bash
-docker compose logs -f praktikum-db-07 2>&1 | grep AUDIT
+docker logs -f praktikum-db-07 2>&1 | grep AUDIT
 ```
 
 Tee päringuid (esimeses terminalis):
